@@ -7,16 +7,13 @@ import com.backendless.persistence.DataQueryBuilder;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 
 /**
  * <p>This is an implementation of the Java Collection interface enabling to retrieve and iterate over a collection of objects stored in a Backendless data table.</p>
@@ -27,6 +24,7 @@ import java.util.stream.Stream;
  * <li><b>persisted</b> - all retrieved objects are saved locally to enable faster access in future iterations. The persisted data is shared between all iterators returned by the collection. To enable this mode use the "preservedData" parameter.
  * <li><b>transient</b> - every iterator returned by the collection works with a fresh data collection returned from the server.
  * </ul>
+ *
  * @param <T> the type of your entity. Be sure it properly mapped with {@code Backendless.Data.mapTableToClass( String tableName, Class<T> entityClass )}
  */
 public class BackendlessDataCollection<T extends BackendlessDataCollection.Identifiable<T>> implements Collection<T>
@@ -34,9 +32,9 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   public static interface Identifiable<T>
   {
     String getObjectId();
-    void setObjectId(String id);
-  }
 
+    void setObjectId( String id );
+  }
 
   private Class<T> entityType;
   private IDataStore<T> iDataStore;
@@ -89,6 +87,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   /**
    * Only for <b>persisted</b> mode.
+   *
    * @return the number of elements that preserved locally.
    */
   public int getPersistedSize()
@@ -101,6 +100,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   /**
    * Only for <b>persisted</b> mode.
+   *
    * @return true, if the current collection is fully loaded from remote server.
    */
   public boolean isLoaded()
@@ -132,7 +132,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
    */
   public void populate()
   {
-    if (this.preservedData == null)
+    if( this.preservedData == null )
       throw new IllegalStateException( "This collection is not persisted." );
 
     Iterator<T> iter = this.iterator();
@@ -170,20 +170,29 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   private String getQuery( Collection<T> objs, boolean exclude )
   {
-    return getQueryByIds( objs.stream().map( T::getObjectId ), exclude );
+    String firstPart = exclude ? "objectId not in (" : "objectId in (";
+
+    StringBuilder sb = new StringBuilder( firstPart );
+
+    for( T obj : objs )
+      sb.append( '\'' ).append( obj.getObjectId() ).append( '\'' ).append( ',' );
+
+    sb.replace( sb.length() - 1, sb.length(), ")" );
+
+    String query = sb.toString();
+    query = (this.slice.isEmpty()) ? query : this.slice + " and " + query;
+    return query;
   }
 
   private String getQueryByIds( Collection<String> ids, boolean exclude )
   {
-    return getQueryByIds( ids.stream(), exclude );
-  }
-
-  private String getQueryByIds( Stream<String> idsStream, boolean exclude )
-  {
     String firstPart = exclude ? "objectId not in (" : "objectId in (";
 
     StringBuilder sb = new StringBuilder( firstPart );
-    idsStream.forEach( obj -> sb.append( '\'' ).append( obj ).append( '\'' ).append( ',' ) );
+
+    for( String id : ids )
+      sb.append( '\'' ).append( id ).append( '\'' ).append( ',' );
+
     sb.replace( sb.length() - 1, sb.length(), ")" );
 
     String query = sb.toString();
@@ -244,6 +253,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   /**
    * If this collection is <i>persisted</i> and fully loaded, than no api-calls will be performed.
+   *
    * @param o
    * @return
    */
@@ -268,6 +278,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   /**
    * If this collection is <i>persisted</i> and fully loaded, than no api-calls will be performed.
+   *
    * @return
    */
   @Override
@@ -287,6 +298,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   /**
    * If this collection is <i>persisted</i>, than no api-calls will be performed.
+   *
    * @return
    */
   @Override
@@ -318,7 +330,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
       DataQueryBuilder queryBuilder = DataQueryBuilder.create().setWhereClause( this.getQuery( savedEntity.getObjectId() ) );
       if( this.iDataStore.getObjectCount( queryBuilder ) == 0 )
       {
-        this.iDataStore.remove(this.getQuery( savedEntity.getObjectId() ) );
+        this.iDataStore.remove( this.getQuery( savedEntity.getObjectId() ) );
         return false;
       }
     }
@@ -332,6 +344,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   /**
    * If this collection is <i>persisted</i> and fully loaded, than no api-calls will be performed.
+   *
    * @param c
    * @return
    */
@@ -343,7 +356,10 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
     if( this.preservedData != null && this.isLoaded )
     {
-      List<String> listId = collection.stream().map( T::getObjectId ).collect( Collectors.toList() );
+      Set<String> listId = new HashSet<>();
+      for( T obj : collection )
+        listId.add( obj.getObjectId() );
+
       return this.preservedData.keySet().containsAll( listId );
     }
 
@@ -370,11 +386,12 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
     if( this.preservedData != null )
     {
-      IntStream.rangeClosed( 0, c.size() ).mapToObj( n -> {
-        T obj = ((List<T>) c).get( n );
-        obj.setObjectId( listId.get( n ) );
-        return obj;
-      } ).forEach( obj -> preservedData.put( obj.getObjectId(), obj ) );
+      for( int i = 0; i < c.size(); i++ )
+      {
+        T obj = ((List<T>) c).get( i );
+        obj.setObjectId( listId.get( i ) );
+        preservedData.put( obj.getObjectId(), obj );
+      }
     }
 
     this.size += listId.size();
@@ -385,12 +402,25 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   public boolean retainAll( Collection<?> c )
   {
     c.forEach( this::checkObjectTypeAndId );
-    Set<String> listId = ((Collection<T>) c).stream().map( T::getObjectId ).collect( Collectors.toSet() );
+
+    Set<String> listId = new HashSet<>();
+    for( T obj : (Collection<T>) c )
+      listId.add( obj.getObjectId() );
 
     boolean result = this.iDataStore.remove( this.getQueryByIds( listId, true ) ) != 0;
 
     if( this.preservedData != null )
-      result |= this.preservedData.keySet().removeIf( key -> !listId.contains( key ) );
+    {
+      Iterator<String> idIterator = this.preservedData.keySet().iterator();
+      while( idIterator.hasNext() )
+      {
+        if( !listId.contains( idIterator.next() ) )
+        {
+          result = true;
+          idIterator.remove();
+        }
+      }
+    }
 
     return result;
   }
@@ -407,6 +437,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   /**
    * Takes into account only 'entityType' and 'slice'.
+   *
    * @param o
    * @return
    */
@@ -423,6 +454,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
 
   /**
    * Takes into account only 'entityType' and 'slice'.
+   *
    * @return
    */
   @Override
@@ -430,7 +462,6 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   {
     return Objects.hash( entityType, slice );
   }
-
 
   public class BackendlessDataCollectionIterator implements Iterator<T>
   {
@@ -443,13 +474,12 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
     private Iterator<T> persistedIterator;
     private T[] loadedData;
 
-
     private BackendlessDataCollectionIterator()
     {
       if( BackendlessDataCollection.this.size() < 1 )
         return;
 
-      if (BackendlessDataCollection.this.isLoaded)
+      if( BackendlessDataCollection.this.isLoaded )
       {
         persistedIterator = BackendlessDataCollection.this.preservedData.values().iterator();
         return;
@@ -458,7 +488,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
       this.currentPosition = 0;
       this.queryBuilder = DataQueryBuilder.create().setWhereClause( BackendlessDataCollection.this.slice ).setPageSize( pageSize );
 
-      if (BackendlessDataCollection.this.preservedData == null)
+      if( BackendlessDataCollection.this.preservedData == null )
       {
         this.currentPageData = BackendlessDataCollection.this.iDataStore.find( this.queryBuilder );
         this.nextPageData = BackendlessDataCollection.this.iDataStore.find( this.queryBuilder.prepareNextPage() );
@@ -466,7 +496,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
       else
       {
         T[] array = (T[]) Array.newInstance( BackendlessDataCollection.this.entityType, BackendlessDataCollection.this.preservedData.size() );
-        loadedData = BackendlessDataCollection.this.preservedData.values().toArray(array);
+        loadedData = BackendlessDataCollection.this.preservedData.values().toArray( array );
 
         // load first page
         this.currentPageData = new ArrayList<>();
@@ -485,14 +515,12 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
     {
       boolean hasNext;
 
-      if (this.persistedIterator != null)
+      if( this.persistedIterator != null )
         hasNext = this.persistedIterator.hasNext();
       else
-        hasNext = ((currentPageData != null && currentPosition % pageSize < currentPageData.size())
-                   || (nextPageData != null && !nextPageData.isEmpty())
-                  );
+        hasNext = ((currentPageData != null && currentPosition % pageSize < currentPageData.size()) || (nextPageData != null && !nextPageData.isEmpty()));
 
-      if (!hasNext)
+      if( !hasNext )
       {
         this.currentPageData = this.nextPageData = null;
         this.persistedIterator = null;
