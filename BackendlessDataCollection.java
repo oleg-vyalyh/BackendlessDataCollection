@@ -429,7 +429,8 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * Clears the data in both local cache and in the remote table.
+   * Clears all data in the remote table and in local collection (if mode is <i>persisted</i>).
+   * Takes into account the slice (where clause) that was set on creation.
    */
   @Override
   public void clear()
