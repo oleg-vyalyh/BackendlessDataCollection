@@ -16,8 +16,8 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * <p>This is an implementation of the Java Collection interface enabling to retrieve and iterate over a collection of objects stored in a Backendless data table.</p>
- * <p>Interface methods returning data are mapped to various Backendless APIs.</p>
+ * <p>This is an implementation of the Java Collection interface enabling retrieval and iteration over a collection of objects stored in a Backendless data table.</p>
+ * <p>The interface methods returning data are mapped to the corresponding Backendless APIs.</p>
  * <p>The Iterator returned by the implementation lets you access either all objects from the data table or a subset determined by a where clause. Additionally, the implementation can work with data streams.</p>
  *
  * <ul><u>The collection has <i>two modes of operation</i><u>:
@@ -25,14 +25,13 @@ import java.util.Set;
  * <li><b>transient</b> - every iterator returned by the collection works with a fresh data collection returned from the server.
  * </ul>
  *
- * @param <T> the type of your entity. Be sure it properly mapped with {@code Backendless.Data.mapTableToClass( String tableName, Class<T> entityClass )}
+ * @param <T> the type of your entity. Make sure it is properly mapped with {@code Backendless.Data.mapTableToClass( String tableName, Class<T> entityClass )}
  */
 public class BackendlessDataCollection<T extends BackendlessDataCollection.Identifiable<T>> implements Collection<T>
 {
   public static interface Identifiable<T>
   {
     String getObjectId();
-
     void setObjectId( String id );
   }
 
@@ -63,6 +62,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
     this.entityType = entityType;
     this.slice = (slice == null) ? "" : slice;
     this.iDataStore = Backendless.Data.of( this.entityType );
+    
     if( preserveIteratedData )
       this.preservedData = new LinkedHashMap<>();
 
@@ -78,7 +78,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * @return true, if this collection was created with paramer <b>preserveIteratedData</b>
+   * @return true, if this collection was created with parameter <b>preserveIteratedData</b>
    */
   public boolean isPersisted()
   {
@@ -86,7 +86,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * Only for <b>persisted</b> mode.
+   * Only for the <b>persisted</b> mode.
    *
    * @return the number of elements that preserved locally.
    */
@@ -99,9 +99,9 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * Only for <b>persisted</b> mode.
+   * Only for the <b>persisted</b> mode.
    *
-   * @return true, if the current collection is fully loaded from remote server.
+   * @return true, if the current collection ihas been fully loaded from Backendless.
    */
   public boolean isLoaded()
   {
@@ -112,7 +112,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * If this collections in <b>persisted</b> mode, this operation delete all locally saved data and refresh the size.
+   * If this collection is in the <b>persisted</b> mode, this operation deletes all locally saved data and udates the size.
    * The operation has only local effect.
    */
   public void invalidateState()
@@ -127,7 +127,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * Only for <b>persisted</b> mode.
+   * Only for the <b>persisted</b> mode.
    * Fills up this collection with the values from the Backendless table.
    */
   public void populate()
@@ -136,6 +136,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
       throw new IllegalStateException( "This collection is not persisted." );
 
     Iterator<T> iter = this.iterator();
+    
     while( iter.hasNext() )
       iter.next();
   }
@@ -148,15 +149,16 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   private void checkObjectType( Object o )
   {
     if( this.entityType != o.getClass() )
-      throw new IllegalArgumentException( o.getClass() + " is not a type objects of which are contained in this collection." );
+      throw new IllegalArgumentException( o.getClass() + " is not a type of objects contained in this collection." );
   }
 
   private void checkObjectTypeAndId( Object o )
   {
     if( this.entityType != o.getClass() )
-      throw new IllegalArgumentException( o.getClass() + " is not a type objects of which are contained in this collection." );
+      throw new IllegalArgumentException( o.getClass() + " is not a type of objects contained in this collection." );
 
     String objectId = ((T) o).getObjectId();
+    
     if( objectId == null )
       throw new IllegalArgumentException( "'objectId' is null." );
   }
@@ -252,10 +254,10 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * If this collection is <i>persisted</i> and fully loaded, than no api-calls will be performed.
+   * If this collection is in the <i>persisted</i> mode and is fully loaded, this method will result in no additonal API calls to the server.
    *
-   * @param o
-   * @return
+   * @param o object to check if the collection has it
+   * @return true if the object is in the collection, false otherwise
    */
   @Override
   public boolean contains( Object o )
@@ -277,7 +279,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * If this collection is <i>persisted</i> and fully loaded, than no api-calls will be performed.
+   * If this collection is in the <i>persisted</i> mode and is fully loaded, this method will not result in any additional API calls to the server.
    *
    * @return
    */
@@ -290,6 +292,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
     ArrayList<T> list = new ArrayList<>();
 
     Iterator<T> iter = this.iterator();
+    
     while( iter.hasNext() )
       list.add( iter.next() );
 
@@ -297,7 +300,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * If this collection is <i>persisted</i>, than no api-calls will be performed.
+   * If this collection is in the <i>persisted</i> mode and is fully loaded, this method will not result in any additional API calls to the server.
    *
    * @return
    */
@@ -313,7 +316,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * If this collection is a 'slice' of data from Backendless table, then after every <i>add</i> operation another api-call will be performed to check that the new saved object doesn't violate the 'slice' condition.
+   * If this collection is a 'slice' of data from Backendless table, then after every <i>add</i> operation an API call to the server will be performed to check that the new saved object doesn't violate the 'slice' condition.
    *
    * @param t
    * @return
@@ -343,7 +346,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * If this collection is <i>persisted</i> and fully loaded, than no api-calls will be performed.
+   * If this collection is in the <i>persisted</i> mode and is fully loaded, this method will not result in any additional API calls to the server.
    *
    * @param c
    * @return
@@ -426,7 +429,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
   }
 
   /**
-   * Affects on the current local collection (if mode is <i>persisted</i>) and remote Backendless data table.
+   * Clears the data in both local cache and in the remote table.
    */
   @Override
   public void clear()
