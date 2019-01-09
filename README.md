@@ -9,8 +9,8 @@ The Iterator returned by the implementation lets you access either all objects f
 ---
 
 The collection has _**two modes of operation**_:
-  - _**persisted**_ - all retrieved objects are saved locally to enable faster access in future iterations. The persisted data is shared between all iterators returned by the collection. To enable this mode use the `preserveIteratedData` parameter.
-  - _**transient**_ - every iterator returned by the collection works with a fresh data collection returned from the server.
+  - **persisted mode** - all retrieved objects are saved locally to enable faster access in future iterations. The persisted data is shared between all iterators returned by the collection. To enable this mode use the `preserveIteratedData` parameter.
+  - **transient mode** - every iterator returned by the collection works with a fresh data collection returned from the server.
 
 The collection is not thread safe.
 
@@ -31,7 +31,7 @@ Also be sure you properly mapped your custom type with\
 4. orders = new BackendlessDataCollection<>( Order.class, true, "title = 'phone'" );
 ```
 
-**Description:**
+## Description
 
 1. Create **ordinary collection** for table _**order**_ which reflect all records from it.
 - the total size of objects (table rows) is retrieved on object creation;
@@ -42,7 +42,7 @@ Also be sure you properly mapped your custom type with\
 - all `contains`, `add` and `remove` operations directly perform calls to Backendless server;
 - method `invalidateState()` forcibly updates collection real size;
 - method `isPersisted()` always returns _true_;
-- methods `isLoaded()`, `getPersistedSize()`, `populate()` will throw exception, because they are intended only for persisted collection;
+- methods `isLoaded()`, `getPersistedSize()`, `populate()` will throw exception, because they are intended only for **persisted** mode;
 
 2. Create **collection as a slice** of data for table _**order**_. Will reflect only a subset of data which satisfy argument `slice` (in or case it `title = 'phone'`).\
 Main features are the same as in point (1).
@@ -63,3 +63,34 @@ Main features are the same as in point (1).
 4. Create **persisted collection as a slice** for table _**order**_.\
 Combine features from point features are the same as in point (2) and (3).
 
+
+## Methods features
+
+#### `size()`
+Returns the current size of collection which reflect the row size in the underlying table. If the table was changed on the server side, the local become irrelevant. For this case you may use `invalidateState()` method or perform iteration over collection (after iteration size is updated automatically).
+
+#### `getSlice()`
+Returns where clause for the current collection or `null` if it was created without slice.
+
+#### `isPersisted()`
+Returns **true** if the collection was created with parameter `preserveIteratedData == true`, and **false** otherwise.
+
+#### `populate()`
+Only for **persisted mode**.\
+Forcibly populates current collection from the Backendless data table. If `isLoaded() == true`, do nothing. Under the hood it just iterate over remote table.
+
+#### `isLoaded()`
+Only for **persisted mode**.\
+Returns **true** if the data was retrieved from Backendless table in a full (after invocation `populate()` method or full iteration).
+
+#### `getPersistedSize()`
+Only for **persisted mode**.\
+Returns the size of inner store. It may differ from `size()` return value if the iteration over collectin was interrupted.
+
+#### `invalidateState()`
+For **transient mode** forcibly updates collection real size. For **persisted mode** in addition clear all locally saved data, so the next iteration will make requests to the server again.
+
+
+## Examples
+
+#### for-each
