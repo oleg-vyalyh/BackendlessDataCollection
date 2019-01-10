@@ -62,7 +62,7 @@ Main features are the same as in point (1).
 - method `populate()` forcibly download all data from the table (so-called greedy initialization), if `isLoaded() == true` it do nothing;
 
 4. Create **persisted collection as a slice** for table _**order**_.\
-Combine features from point features are the same as in point (2) and (3).
+Combine features from points (2) and (3).
 
 
 ## Methods' features (differences from the regular java collection) and special methods
