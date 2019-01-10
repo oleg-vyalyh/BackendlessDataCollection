@@ -62,7 +62,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
     this.entityType = entityType;
     this.slice = (slice == null) ? "" : slice;
     this.iDataStore = Backendless.Data.of( this.entityType );
-    
+
     if( preserveIteratedData )
       this.preservedData = new LinkedHashMap<>();
 
@@ -136,7 +136,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
       throw new IllegalStateException( "This collection is not persisted." );
 
     Iterator<T> iter = this.iterator();
-    
+
     while( iter.hasNext() )
       iter.next();
   }
@@ -158,7 +158,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
       throw new IllegalArgumentException( o.getClass() + " is not a type of objects contained in this collection." );
 
     String objectId = ((T) o).getObjectId();
-    
+
     if( objectId == null )
       throw new IllegalArgumentException( "'objectId' is null." );
   }
@@ -200,6 +200,22 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
     String query = sb.toString();
     query = (this.slice.isEmpty()) ? query : this.slice + " and " + query;
     return query;
+  }
+
+  /**
+   * <p>Returns object by its '{@code objectId}'. Takes into account slice (where clause).
+   * If this collection is <i>persisted</i> and fully loaded, than no api-calls will be performed.
+   *
+   * @param objectId
+   * @return
+   */
+  public T getById( String objectId )
+  {
+    if( this.preservedData != null && this.isLoaded )
+      return this.preservedData.get( objectId );
+
+    DataQueryBuilder queryBuilder = DataQueryBuilder.create().setWhereClause( this.getQuery( objectId ) );
+    return (T) this.iDataStore.find( queryBuilder );
   }
 
   @Override
@@ -292,7 +308,7 @@ public class BackendlessDataCollection<T extends BackendlessDataCollection.Ident
     ArrayList<T> list = new ArrayList<>();
 
     Iterator<T> iter = this.iterator();
-    
+
     while( iter.hasNext() )
       list.add( iter.next() );
 
