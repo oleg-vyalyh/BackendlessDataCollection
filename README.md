@@ -101,6 +101,9 @@ Remove all data from the underlying table (if the collection was created without
 Returns object by its `objectId`. Takes into account slice (where clause).
 If this collection is **persisted** and fully loaded, than no api-calls will be performed.
 
+#### `toArray()`
+It is always greedy operation. Calling this method will retrive all data from the table.
+
 #### `equals()`
 Takes into account only 'entityType' and 'slice', that were set during collection creation.
 
