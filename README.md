@@ -48,7 +48,7 @@ Also be sure you properly mapped your custom type with\
 Main features are the same as in point (1).
 - the total size of objects satisfied the _slice_ is retrieved on object creation;
 - you can iterate only through the subset of objects;
-- all `contains`, `add` and `remove` operations directly perform calls to Backendless server and would be discarded if the object ;
+- all `contains`, `add` and `remove` operations directly perform calls to Backendless server and would be discarded if the object doesn't match the slice clause;
 
 3. Create **persisted collection** for table _**order**_ (`preserveIteratedData` parameter). Some operations would perform locally (without api calls to the server) and thus drastically reduce perform time.\
 Main features are the same as in point (1).
