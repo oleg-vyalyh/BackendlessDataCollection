@@ -2,7 +2,7 @@
 
 This is an implementation of the Java Collection interface enabling to retrieve and iterate over a collection of objects stored in a Backendless data table.</p>
 
-Interface methods returning data are mapped to various Backendless APIs.</p>
+Interface methods that returning data are mapped to various Backendless Data APIs.</p>
 
 The Iterator returned by the implementation lets you access either all objects from the data table or a subset determined by a where clause. Additionally, the implementation can work with data streams.</p>
 
@@ -33,7 +33,7 @@ Also be sure you properly mapped your custom type with\
 
 ## Description
 
-### 1. `new BackendlessDataCollection<>( Order.class )`
+#### 1. `new BackendlessDataCollection<>( Order.class )`
 Create **ordinary collection** for table _**order**_ which reflect all records from it. By default it is created in **transient mode**, thus no data will safe locally.
 - the total size of objects (table rows) is retrieved on object creation;
 - you can iterate through the entire collection;
@@ -45,14 +45,14 @@ Create **ordinary collection** for table _**order**_ which reflect all records f
 - method `isPersisted()` always returns _true_;
 - methods `isLoaded()`, `getPersistedSize()`, `populate()` will throw exception, because they are intended only for **persisted** mode;
 
-### 2. `new BackendlessDataCollection<>( Order.class, "title = 'phone'" )`
+#### 2. `new BackendlessDataCollection<>( Order.class, "title = 'phone'" )`
 Create **collection as a slice** of data for table _**order**_. Will reflect only a subset of data which satisfy argument `slice` (in or case it `title = 'phone'`).\
 Main features are the same as in point (1).
 - the total size of objects satisfied the _slice_ is retrieved on object creation;
 - you can iterate only through the subset of objects;
 - all `contains`, `add` and `remove` operations directly perform calls to Backendless server and would be discarded if the object doesn't match the slice clause;
 
-### 3. `new BackendlessDataCollection<>( Order.class, true )`
+#### 3. `new BackendlessDataCollection<>( Order.class, true )`
 Create **persisted collection** for table _**order**_ (`preserveIteratedData` parameter). Some operations would perform locally (without api calls to the server) and thus drastically reduce perform time.\
 Main features are the same as in point (1).
 - collection is lazy, so the data will be loaded only during iteration over it;
@@ -64,7 +64,7 @@ Main features are the same as in point (1).
 - method `invalidateState()` forcibly updates collection real size and clear all locally saved data, so the next iteration will make requests to the server again;
 - method `populate()` forcibly download all data from the table (so-called greedy initialization), if `isLoaded() == true` it do nothing;
 
-### 4. `new BackendlessDataCollection<>( Order.class, true, "title = 'phone'" )`
+#### 4. `new BackendlessDataCollection<>( Order.class, true, "title = 'phone'" )`
 Create **persisted collection as a slice** for table _**order**_.\
 Combine features from points (2) and (3).
 
