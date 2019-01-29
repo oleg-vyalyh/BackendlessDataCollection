@@ -6,6 +6,8 @@ Interface methods that returning data are mapped to various Backendless Data API
 
 The Iterator returned by the implementation lets you access either all objects from the data table or a subset determined by a where clause. Additionally, the implementation can work with data streams.</p>
 
+[Whant the examples now](https://github.com/oleg-vyalyh/BackendlessDataCollection#examples)
+
 ---
 
 The collection has _**two modes of operation**_:
