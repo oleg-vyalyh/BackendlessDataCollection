@@ -1,4 +1,4 @@
-package com.examples.backendless.datacollection;
+package package com.backendless.persistence;
 
 import com.backendless.Backendless;
 import com.backendless.IDataStore;
