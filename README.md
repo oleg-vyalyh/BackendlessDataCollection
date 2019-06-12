@@ -44,7 +44,7 @@ Create **ordinary collection** for table _**order**_ which reflect all records f
 - if the iterator reached the end (wasn't interrupted) the actual collection size is refreshed automatically;
 - all `contains`, `add` and `remove` operations directly perform calls to Backendless server;
 - method `invalidateState()` forcibly updates collection real size;
-- method `isPersisted()` always returns _true_;
+- method `isPersisted()` always returns _false_;
 - methods `isLoaded()`, `getPersistedSize()`, `populate()` will throw exception, because they are intended only for **persisted** mode;
 
 #### 2. `new BackendlessDataCollection<>( Order.class, "title = 'phone'" )`
