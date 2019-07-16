@@ -58,7 +58,7 @@ Main features are the same as in point (1).
 Create **persisted collection** for table _**order**_ (`preserveIteratedData` parameter). Some operations would perform locally (without api calls to the server) and thus drastically reduce perform time.\
 Main features are the same as in point (1).
 - collection is lazy, so the data will be loaded only during iteration over it;
-- only first iteration will perfrom calls to the Backendless server, all subsequent interations will  be done locally without any request;
+- only first iteration will perform calls to the Backendless server, all subsequent iterations will  be done locally without any request;
 - if the iterator was interrupted, only part of the data would be saved locally and next time iterator firstly will iterate over local data and then (if need) beging make calls to the server;
 - method `isPersisted()` always returns _true_;
 - when all data from table saved locally, `isLoaded()` returns _true_;
