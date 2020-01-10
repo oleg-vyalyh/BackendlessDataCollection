@@ -4,7 +4,7 @@ This is an implementation of the Java Collection interface enabling to retrieve 
 
 Interface methods that returning data are mapped to various Backendless Data APIs.</p>
 
-The Iterator returned by the implementation lets you access either all objects from the data table or a subset determined by a where clause. Additionally, the implementation can work with data streams.</p>
+The Iterator returned by the implementation lets you access either all objects from the data table or a subset determined by a where clause. **Additionally, the implementation can work with <ins>data streams</ins>.**</p>
 
 [Whant the examples now](https://github.com/oleg-vyalyh/BackendlessDataCollection#examples)
 
