@@ -36,7 +36,7 @@ Also be sure you properly mapped your custom type with\
 ## Description
 
 #### 1. `new BackendlessDataCollection<>( Order.class )`
-Create **ordinary collection** for table _**order**_ which reflect all records from it. By default it is created in **transient mode**, thus no data will safe locally.
+Create **ordinary collection** for table _**order**_ which reflect all records from it. By default it is created in **transient mode**, thus no data will be saved locally.
 - the total size of objects (table rows) is retrieved on object creation;
 - you can iterate through the entire collection;
 - every iteration will perfrom calls to the Backendless server;
